@@ -110,4 +110,4 @@ The library defines a `matrix_t` structure to represent matrices, with associate
 To use this library, include the provided header file in your C code:
 
 ```c
-#include "matrix_operations.h"
+#include "matrix.h"
