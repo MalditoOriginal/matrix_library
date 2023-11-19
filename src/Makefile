@@ -1,71 +1,49 @@
-CC=gcc
-NAME=s21_matrix.a
-CFLAGS=-Wall -Wextra -Werror -std=c11
-GCOV_FLAGS=-fprofile-arcs -ftest-coverage
+CC := gcc
+CFLAGS := -Wall -Werror -Wextra -std=c11
+OS := $(shell uname)
+CSRC := $(filter-out s21_*_test.c, $(wildcard s21_*.c))
+OBJ := $(CSRC:.c=.o)
 
-OS=$(shell uname -s)
-ROOT_DIR=$(shell dirname $(abspath $(MAKEFILE_LIST)))
-
-SRCS=$(shell find $(ROOT_DIR) -name "s21_*.c" ! -name "s21_*_test.c")
-SRC_OBJS=$(patsubst %.c,%.o,$(SRCS))
-TEST_SRCS=$(shell find $(ROOT_DIR) -name "s21_*_test.c")
-
-ifeq ($(OS),Darwin)
-	LINUX_FLAGS=
-	OPEN_CMD=open
-endif
 ifeq ($(OS),Linux)
-	OPEN_CMD=xdg-open
-	LINUX_FLAGS=-lsubunit -lrt -lpthread -lm
+FLAGS := -lm -lpthread -lrt -lsubunit -fprofile-arcs -ftest-coverage -lcheck
+else
+FLAGS := -lm -lpthread -fprofile-arcs -ftest-coverage -lcheck
 endif
 
-.SILENT:
-.PHONY: all
-all: $(NAME) gcov_report
+TESTS := s21_calc_complements_test s21_create_test s21_determinant_test \
+	s21_eq_matrix_test s21_inverse_matrix_test s21_matrix_test s21_mul_matrix_test \
+	s21_mul_number_test s21_sub_matrix_test s21_sum_matrix_test
 
-$(NAME): $(SRC_OBJS) $(ROOT_DIR)/s21_matrix.h
-	ar -rcs $(ROOT_DIR)/$(NAME) $(SRC_OBJS)
-	ranlib $(ROOT_DIR)/$(NAME)
-	cp $(ROOT_DIR)/$(NAME) $(ROOT_DIR)/lib$(NAME)
-	rm -rf $(ROOT_DIR)/*.o
+all: clean s21_matrix.a test gcov_report
 
-.PHONY: help
-help: ## Display this help screen
-	awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) }' $(MAKEFILE_LIST)
+test: $(TESTS)
 
-.PHONY: lint
-lint: ## Lint
-	clang-format -i $(ROOT_DIR)/*.c
+$(TESTS): %: %.c s21_matrix.a
+	$(CC) $< s21_matrix.a $(FLAGS) -o $@
+	./$@
 
-.PHONY: lint-check
-lint-check: ## Lint check
-	cp ../materials/linters/.clang-format ./
-	clang-format -n $(ROOT_DIR)/*.c
+s21_matrix.a: $(OBJ)
+	ar -crs $@ $^
 
-.PHONY: test
-test: $(NAME) ## Test
-	$(CC) $(CFLAGS) ${TEST_SRCS} $< -o $(ROOT_DIR)/test -lcheck $(LINUX_FLAGS)
-	$(ROOT_DIR)/test && rm -rf $(ROOT_DIR)/test
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: gcov_report
-gcov_report: $(NAME)
-	$(CC) $(CFLAGS) $(GCOV_FLAGS) ${TEST_SRCS} ${SRCS} -o $(ROOT_DIR)/gcov_report -lcheck $(LINUX_FLAGS)
-	$(ROOT_DIR)/gcov_report && rm -rf $(ROOT_DIR)/gcov_report
-	lcov -t s21_matrix_test -o $(ROOT_DIR)/s21_matrix_test.info -c -d .
-	genhtml -o $(ROOT_DIR)/report $(ROOT_DIR)/s21_matrix_test.info
-	$(OPEN_CMD) $(ROOT_DIR)/report/index.html
-	make clean-lcov
+.PHONY: all test clean gcov_report style style_test cppcheck
 
-.PHONY: clean-lcov
-clean-lcov: ## Clean lcov
-	rm -rf $(ROOT_DIR)/*.gcda \
-		   $(ROOT_DIR)/*.gcno \
-		   $(ROOT_DIR)/*.info
+gcov_report: clean 
+	lcov -t "Code Coverage Report" -o report.info --no-external -c -d .
+	genhtml -o report report.info
 
-.PHONY: clean
-clean: clean-lcov ## Clean
-	rm -rf $(ROOT_DIR)/*.a \
-		   $(ROOT_DIR)/*.o \
-		   $(ROOT_DIR)/test \
-		   $(ROOT_DIR)/report \
-		   $(ROOT_DIR)/gcov_report
+	open ./report/index.html
+
+clean:
+	rm -rf *.o *.a $(TESTS) *.gcno *gcda *.gcov gcov report report.info
+
+style:
+	clang-format -i -style=google *.c *.h
+
+style_test:
+	clang-format -n -style=google *.c *.h
+
+cppcheck:
+	cppcheck *.c *.h
