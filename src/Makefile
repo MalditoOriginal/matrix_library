@@ -33,7 +33,6 @@ s21_matrix.a: $(OBJ)
 gcov_report: clean 
 	lcov -t "Code Coverage Report" -o report.info --no-external -c -d .
 	genhtml -o report report.info
-
 	open ./report/index.html
 
 clean:

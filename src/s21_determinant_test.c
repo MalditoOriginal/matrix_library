@@ -78,7 +78,7 @@ Suite *s21_determinant_test(void) {
   tcase_add_test(tc, s21_determinant_2);
   tcase_add_test(tc, s21_determinant_3);
   tcase_add_test(tc, s21_determinant_4);
- // tcase_add_test(tc, s21_determinant_5);
+  // tcase_add_test(tc, s21_determinant_5);
   suite_add_tcase(s, tc);
   return s;
 }

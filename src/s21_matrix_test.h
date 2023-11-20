@@ -1,7 +1,7 @@
+#include <check.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <check.h>
 
 #define OK 0
 #define MATRIX_ERROR 1

@@ -6,9 +6,9 @@
 #define FAILURE 0
 
 typedef struct {
-    double **matrix;
-    int rows;
-    int cols;
+  double **matrix;
+  int rows;
+  int cols;
 } matrix_t;
 
 int s21_create_matrix(int rows, int cols, matrix_t *result);

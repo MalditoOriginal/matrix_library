@@ -14,7 +14,7 @@ int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
     if (ret == 0 && fabs(determinant) > 1e-07) {
       // Initialize matrices for algebraic complement and its transpose
       matrix_t cofactor_matrix, transposed_cofactor;
-      
+
       // Calculate the complements of the input matrix
       ret = s21_calc_complements(A, &cofactor_matrix);
 
@@ -23,7 +23,8 @@ int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
         ret = s21_transpose(&cofactor_matrix, &transposed_cofactor);
 
         if (ret == 0) {
-          // Calculate the inverse matrix by dividing the transposed complement matrix by the determinant
+          // Calculate the inverse matrix by dividing the transposed complement
+          // matrix by the determinant
           ret = s21_mul_number(&transposed_cofactor, 1.0 / determinant, result);
         }
 

@@ -1,4 +1,5 @@
 #include "s21_matrix.h"
+
 #include "s21_matrix_test.h"
 
 void matrixFull(double count, matrix_t *matrix) {
