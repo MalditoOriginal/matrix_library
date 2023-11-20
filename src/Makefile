@@ -39,7 +39,7 @@ gcov_report: clean
 clean:
 	rm -rf *.o *.a $(TESTS) *.gcno *gcda *.gcov gcov report report.info
 
-style:
+style_apply:
 	clang-format -i -style=google *.c *.h
 
 style_test:
