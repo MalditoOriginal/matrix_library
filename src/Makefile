@@ -1,48 +1,80 @@
-CC := gcc
-CFLAGS := -Wall -Werror -Wextra -std=c11
-OS := $(shell uname)
-CSRC := $(filter-out s21_*_test.c, $(wildcard s21_*.c))
-OBJ := $(CSRC:.c=.o)
+CC=gcc
+NAME=s21_matrix.a
+CFLAGS=-Wall -Wextra -Werror -std=c11
+GCOV_FLAGS=-fprofile-arcs -ftest-coverage
 
+OS=$(shell uname -s)
+ROOT_DIR=$(shell dirname $(abspath $(MAKEFILE_LIST)))
+
+SRCS=$(shell find $(ROOT_DIR) -name "s21_*.c" ! -name "s21_*_test.c")
+SRC_OBJS=$(patsubst %.c,%.o,$(SRCS))
+TEST_SRCS=$(shell find $(ROOT_DIR) -name "s21_*_test.c")
+
+ifeq ($(OS),Darwin)
+	LINUX_FLAGS=
+	OPEN_CMD=open
+	LCOV_INSTALL_CMD=brew install lcov
+endif
 ifeq ($(OS),Linux)
-FLAGS := -lm -lpthread -lrt -lsubunit -fprofile-arcs -ftest-coverage -lcheck
-else
-FLAGS := -lm -lpthread -fprofile-arcs -ftest-coverage -lcheck
+	OPEN_CMD=xdg-open
+	LCOV_INSTALL_CMD=apt install lcov
+	LINUX_FLAGS=-lsubunit -lrt -lpthread -lm
 endif
 
-TESTS := s21_calc_complements_test s21_create_test s21_determinant_test \
-	s21_eq_matrix_test s21_inverse_matrix_test s21_matrix_test s21_mul_matrix_test \
-	s21_mul_number_test s21_sub_matrix_test s21_sum_matrix_test
+.SILENT:
+.PHONY: all
+all: $(NAME)
 
-all: clean s21_matrix.a test gcov_report
+$(NAME): $(SRC_OBJS) $(ROOT_DIR)/s21_matrix.h
+	ar -rcs $(ROOT_DIR)/$(NAME) $(SRC_OBJS)
+	ranlib $(ROOT_DIR)/$(NAME)
+	cp $(ROOT_DIR)/$(NAME) $(ROOT_DIR)/lib$(NAME)
+	rm -rf $(ROOT_DIR)/*.o
 
-test: $(TESTS)
+.PHONY: help
+help: ## Display this help screen
+	awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) }' $(MAKEFILE_LIST)
 
-$(TESTS): %: %.c s21_matrix.a
-	$(CC) $< s21_matrix.a $(FLAGS) -o $@
-	./$@
+.PHONY: lint
+lint: ## Lint
+	clang-format -i $(ROOT_DIR)/*.c
 
-s21_matrix.a: $(OBJ)
-	ar -crs $@ $^
+.PHONY: lint-check
+lint-check: ## Lint check
+	cp ../materials/linters/.clang-format ./
+	clang-format -n $(ROOT_DIR)/*.c
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+.PHONY: test
+test: $(NAME) ## Test
+	$(CC) $(CFLAGS) ${TEST_SRCS} $< -o $(ROOT_DIR)/test -lcheck $(LINUX_FLAGS)
+	$(ROOT_DIR)/test && rm -rf $(ROOT_DIR)/test
 
-.PHONY: all test clean gcov_report style style_test cppcheck
+.PHONY: gcov_report
+gcov_report: $(NAME) install-lcov ## Gcov report
+	$(CC) $(CFLAGS) $(GCOV_FLAGS) ${TEST_SRCS} ${SRCS} -o $(ROOT_DIR)/gcov_report -lcheck $(LINUX_FLAGS)
+	$(ROOT_DIR)/gcov_report && rm -rf $(ROOT_DIR)/gcov_report
+	lcov -t s21_matrix_test -o $(ROOT_DIR)/s21_matrix_test.info -c -d .
+	genhtml -o $(ROOT_DIR)/report $(ROOT_DIR)/s21_matrix_test.info
+	$(OPEN_CMD) $(ROOT_DIR)/report/index.html
+	make clean-lcov
 
-gcov_report: clean 
-	lcov -t "Code Coverage Report" -o report.info --no-external -c -d .
-	genhtml -o report report.info
-	open ./report/index.html
+.PHONY: install-lcov
+install-lcov: ## Install lcov
+	$(LCOV_INSTALL_CMD)
 
-clean:
-	rm -rf *.o *.a $(TESTS) *.gcno *gcda *.gcov gcov report report.info
+.PHONY: clean-lcov
+clean-lcov: ## Clean lcov
+	rm -rf $(ROOT_DIR)/*.gcda \
+		   $(ROOT_DIR)/*.gcno \
+		   $(ROOT_DIR)/*.info
 
-style_apply:
-	clang-format -i -style=google *.c *.h
+.PHONY: clean
+clean: clean-lcov ## Clean
+	rm -rf $(ROOT_DIR)/*.a \
+		   $(ROOT_DIR)/*.o \
+		   $(ROOT_DIR)/test \
+		   $(ROOT_DIR)/report \
+		   $(ROOT_DIR)/gcov_report
 
-style_test:
-	clang-format -n -style=google *.c *.h
-
-cppcheck:
-	cppcheck *.c *.h
+leak: test
+	CK_FORK=no leaks -atExit -- test

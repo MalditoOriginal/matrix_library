@@ -2,8 +2,8 @@
 #include "s21_matrix_test.h"
 
 START_TEST(s21_inverse_matrix_1) {
-  matrix_t matrix = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrix = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(3, 3, &matrix);
   matrix.matrix[0][0] = 2;
   matrix.matrix[0][1] = 8;
@@ -21,8 +21,8 @@ START_TEST(s21_inverse_matrix_1) {
 END_TEST
 
 START_TEST(s21_inverse_matrix_2) {
-  matrix_t matrix = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrix = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(6, 8, &matrix);
   matrixFull(5, &matrix);
   ck_assert_int_eq(s21_inverse_matrix(&matrix, &result), CALC_ERROR);
@@ -32,8 +32,8 @@ START_TEST(s21_inverse_matrix_2) {
 END_TEST
 
 START_TEST(s21_inverse_matrix_3) {
-  matrix_t matrix = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrix = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(0, 0, &matrix);
   ck_assert_int_eq(s21_inverse_matrix(&matrix, &result), MATRIX_ERROR);
   s21_remove_matrix(&matrix);
@@ -42,8 +42,8 @@ START_TEST(s21_inverse_matrix_3) {
 END_TEST
 
 START_TEST(s21_inverse_matrix_4) {
-  matrix_t matrix = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrix = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(2, 2, &matrix);
   matrixFull(7, &matrix);
   ck_assert_int_eq(s21_inverse_matrix(&matrix, &result), OK);

@@ -2,9 +2,9 @@
 #include "s21_matrix_test.h"
 
 START_TEST(s21_sum_matrix_1) {
-  matrix_t matrixA = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t matrixB = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrixA = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t matrixB = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(2, 8, &matrixA);
   s21_create_matrix(2, 8, &matrixB);
   matrixFull(1.986875765, &matrixA);
@@ -17,9 +17,9 @@ START_TEST(s21_sum_matrix_1) {
 END_TEST
 
 START_TEST(s21_sum_matrix_2) {
-  matrix_t matrixA = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t matrixB = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrixA = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t matrixB = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(2, 8, &matrixA);
   matrixFull(1, &matrixA);
   s21_create_matrix(0, 8, &matrixB);
@@ -31,9 +31,9 @@ START_TEST(s21_sum_matrix_2) {
 END_TEST
 
 START_TEST(s21_sum_matrix_3) {
-  matrix_t matrixA = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t matrixB = {.rows = 0, .cols = 0, .matrix = NULL};
-  matrix_t result = {.rows = 0, .cols = 0, .matrix = NULL};
+  matrix_t matrixA = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t matrixB = {.rows = 0, .columns = 0, .matrix = NULL};
+  matrix_t result = {.rows = 0, .columns = 0, .matrix = NULL};
   s21_create_matrix(2, 8, &matrixA);
   s21_create_matrix(2, 7, &matrixB);
   matrixFull(1, &matrixA);
